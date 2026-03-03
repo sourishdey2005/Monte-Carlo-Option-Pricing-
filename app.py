@@ -2442,10 +2442,22 @@ def render_sidebar() -> Tuple[OptionParams, str, int, MarketData]:
     """
     st.sidebar.header("⚙️ Configuration")
     
-    # API Configuration Section (Hardcoded)
-    with st.sidebar.expander("🔑 API Status", expanded=False):
-        st.success("✅ Alpha Vantage API: Hardcoded Active")
-        st.info("Using Integrated Quantitative Intelligence Hub")
+    # API Configuration Section
+    with st.sidebar.expander("🔑 Custom API Key", expanded=False):
+        api_key_override = st.text_input(
+            "Personal API Key (Optional)",
+            value="",
+            type="password",
+            placeholder="Enter Alpha Vantage Key",
+            help="Providing your own key bypasses the integrated rate limits."
+        )
+        
+        if api_key_override:
+            # Update the environment for the current process
+            os.environ["ALPHA_VANTAGE_API_KEY"] = api_key_override
+            # Reinitialize the singleton client to pick up the new key
+            AlphaVantageClient._instance = None
+            st.success("✅ Personal key active")
     
     # Market Data Section
     st.sidebar.subheader("📊 Market Data")
