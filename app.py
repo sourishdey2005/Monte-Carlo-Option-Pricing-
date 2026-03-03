@@ -236,10 +236,6 @@ class AlphaVantageClient:
         
         Returns:
             MarketData object with price, volume, and volatility info
-        
-        Note:
-            Uses API key from ALPHA_VANTAGE_API_KEY environment variable.
-            Falls back to mock data if API fails or rate limited.
         """
         symbol = symbol.upper().strip()
         
@@ -266,17 +262,33 @@ class AlphaVantageClient:
             response.raise_for_status()
             data = response.json()
             
-            # Parse response
+            # Check for Alpha Vantage specific notes/errors
+            if "Note" in data:
+                # This is usually a rate limit warning
+                st.info(f"ℹ️ API Rate limit: Using fallback data for {symbol}")
+                return self._generate_mock_data(symbol)
+            
+            if "Error Message" in data:
+                # Invalid API key or symbol
+                st.warning(f"⚠️ API Error: {data['Error Message']}")
+                return self._generate_mock_data(symbol)
+                
+            # Parse successful response
             if GLOBAL_QUOTE_KEY in data and data[GLOBAL_QUOTE_KEY]:
                 quote = data[GLOBAL_QUOTE_KEY]
                 
+                # Check if we got an empty quote (can happen for invalid symbols sometimes)
+                if not quote.get('01. symbol'):
+                    raise ValueError(f"No data found for symbol {symbol}")
+                
                 market_data = MarketData(
                     symbol=symbol,
-                    price=float(quote['05. price']),
-                    change=float(quote['09. change']),
-                    change_percent=float(quote['10. change percent'].rstrip('%')),
-                    volume=int(quote['06. volume']),
-                    date=quote['07. latest trading day'],
+                    price=float(quote.get('05. price', 0)),
+                    change=float(quote.get('09. change', 0)),
+                    # Remove % and handle possible missing key
+                    change_percent=float(quote.get('10. change percent', '0%').rstrip('%')),
+                    volume=int(quote.get('06. volume', 0)),
+                    date=quote.get('07. latest trading day', datetime.now().strftime("%Y-%m-%d")),
                     historical_volatility=self._estimate_volatility(symbol),
                     is_mock=False
                 )
@@ -285,17 +297,19 @@ class AlphaVantageClient:
                 self._cache[symbol] = (market_data, time.time())
                 
                 if self._using_demo:
-                    st.info(f"✓ Live data fetched for {symbol} (DEMO key - limited usage)")
+                    st.info(f"✓ Live data fetched for {symbol} (DEMO key)")
                 else:
                     st.success(f"✓ Live data fetched for {symbol}")
                 
                 return market_data
             else:
+                # If we're here, we got a response but not the expected one
                 raise ValueError("Invalid API response structure")
                 
         except Exception as e:
-            if not self._using_demo:
-                st.error(f"API Error for {symbol}: {str(e)}")
+            # Only show error if it's not a known fallback condition
+            if not any(msg in str(e) for msg in ["Rate limit", "API Error"]):
+                 st.error(f"Connection Error for {symbol}: {str(e)}")
             return self._generate_mock_data(symbol)
     
     def _estimate_volatility(self, symbol: str) -> float:
