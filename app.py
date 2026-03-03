@@ -2451,11 +2451,25 @@ def render_sidebar() -> Tuple[OptionParams, str, int, MarketData]:
     st.sidebar.subheader("📊 Market Data")
     
     popular_tickers = [
-        "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "JPM", "V", "UNH",
-        "HD", "PG", "MA", "DIS", "ADBE", "CRM", "NFLX", "BAC", "PYPL", "INTC",
-        "AMD", "COST", "CAT", "KO", "PEP", "XOM", "CVX", "WMT", "T", "VZ",
-        "ABT", "ABBV", "ACN", "AVGO", "CVS", "DHR", "GE", "LNT", "LLY", "MDT",
-        "MRK", "ORCL", "PFE", "PM", "TMO", "UPS", "SPY", "QQQ", "IWM", "DIA"
+        # Tech & Growth
+        "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "NFLX", "ADBE", "CRM", 
+        "AMD", "INTC", "CSCO", "ORCL", "SNOW", "PLTR", "QCOM", "AVGO", "TXN", "MU",
+        # Finance & Payments
+        "JPM", "V", "MA", "BAC", "PYPL", "GS", "MS", "AXP", "WFC", "C", "BLK", "SCHW",
+        # Healthcare & Biotech
+        "UNH", "PFE", "JNJ", "ABT", "ABBV", "MRK", "TMO", "LLY", "MDT", "CVS", "AMGN", "BMY",
+        # Consumer & Retail
+        "WMT", "HD", "PG", "DIS", "KO", "PEP", "COST", "NKE", "SBUX", "TGT", "LOW", "PM", "MO",
+        # Industrials & Energy
+        "XOM", "CVX", "CAT", "BA", "GE", "HON", "UPS", "FEDX", "DE", "RTX", "LMT", "MMM",
+        # Communication & Utilities
+        "T", "VZ", "TMUS", "CMCSA", "NEE", "DUK", "SO", "D", "EXC", "AEP",
+        # ETFs & Indices
+        "SPY", "QQQ", "IWM", "DIA", "GLD", "SLV", "VXX", "EFA", "EEM", "TLT",
+        # Additional Major Assets
+        "BABA", "TSM", "ASML", "SAP", "TM", "HSBC", "RY", "TD", "LIN", "NVO",
+        "SNY", "AZN", "BHP", "RIO", "BP", "SHEL", "UL", "DELL", "IBM", "UBER", 
+        "ABNB", "COIN", "DKNG", "SHOP", "SQ", "U", "Z", "PYPL", "GME", "AMC"
     ]
     
     ticker_selection = st.sidebar.selectbox(
