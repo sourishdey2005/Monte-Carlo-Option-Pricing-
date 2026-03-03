@@ -1,0 +1,25 @@
+# Monte Carlo Simulation Intelligence - Configuration
+# ===================================================
+
+[alpha_vantage]
+# Get your FREE API key at: https://www.alphavantage.co/support/#api-key
+api_key = "LUOX9WBCP5ZYFZ0K"
+rate_limit_per_minute = 5
+daily_limit = 25
+
+[simulation_defaults]
+ticker = "AAPL"
+num_simulations = 100000
+num_steps = 252
+option_type = "call"
+
+[risk_parameters]
+risk_free_rate = 0.05
+dividend_yield = 0.0
+volatility_range = [0.05, 1.0]
+
+[interface_settings]
+theme = "dark"
+primary_color = "cyan"
+chart_height = 600
+enable_3d_surfaces = true

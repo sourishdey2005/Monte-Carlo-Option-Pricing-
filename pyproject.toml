@@ -1,0 +1,43 @@
+[project]
+name = "monte-carlo-option-pricing"
+version = "3.2.0"
+description = "A professional-grade quantitative dashboard for Monte Carlo option pricing and risk analytics."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    { name = "Sourish Dey", email = "sourishdey2005@gmail.com" }
+]
+keywords = ["quantitative-finance", "monte-carlo", "simulation", "options-pricing", "greeks"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+dependencies = [
+    "streamlit>=1.40.0",
+    "numpy>=1.26.0",
+    "scipy>=1.11.0",
+    "pandas>=2.1.0",
+    "plotly>=5.18.0",
+    "requests>=2.31.0",
+    "urllib3>=2.1.0",
+    "python-dotenv>=1.0.0",
+]
+
+[tool.setuptools]
+packages = ["MonteCarlo"]
+
+[tool.montecarlo]
+# Simulation Defaults (derived from project requirements)
+default_ticker = "AAPL"
+default_simulations = 100000
+default_option_type = "call"
+
+[tool.streamlit]
+# Integration configuration for Streamlit Cloud
+theme_primary_color = "#DE3163"
+theme_background_color = "#0E1117"
+theme_secondary_background_color = "#262730"
+theme_text_color = "#FAFAFA"
+theme_font = "sans serif"
