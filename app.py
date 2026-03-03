@@ -1943,6 +1943,54 @@ def create_risk_neutral_density(params: OptionParams) -> go.Figure:
     fig.update_layout(title="Risk-Neutral Probability Density", xaxis_title="Price at Expiry", yaxis_title="Density", template="plotly_dark", height=400)
     return fig
 
+def create_chaos_phase_space(paths: List[List[float]]) -> go.Figure:
+    """Phase space attractor visualization (S_t vs dS/dt)."""
+    mean_path = np.mean(paths, axis=0)
+    velocity = np.diff(mean_path)
+    fig = go.Figure(go.Scatter(x=mean_path[:-1], y=velocity, mode='lines', line=dict(color='yellow', width=1)))
+    fig.update_layout(title="Phase Space Attractor (Price vs Velocity)", xaxis_title="Price ($)", yaxis_title="Price Change (dS/dt)", template="plotly_dark", height=400)
+    return fig
+
+def create_kelly_growth_viz(params: OptionParams, mc_price: float) -> go.Figure:
+    """Optimal allocation growth trajectory based on Kelly Criterion."""
+    edge = (mc_price / params.S0) - 1
+    odds = mc_price / params.K if params.K > 0 else 1
+    f = max(0, edge / odds) # Simplified Kelly Fraction
+    steps = np.arange(100)
+    growth = (1 + f)**steps
+    fig = go.Figure(go.Scatter(x=steps, y=growth, fill='tozeroy', name='Capital Growth', line=dict(color='lime')))
+    fig.update_layout(title=f"Theoretical Growth via Kelly Fraction (f={f:.4f})", xaxis_title="Trades", yaxis_title="Compounded Capital", template="plotly_dark", height=400)
+    return fig
+
+def create_hurst_persistence_viz(paths: List[List[float]]) -> go.Figure:
+    """Distribution of path persistence (Hurst Exponent)."""
+    h_vals = []
+    for p in paths[:50]:
+        lags = range(2, 20)
+        tau = [np.sqrt(np.std(np.subtract(p[lag:], p[:-lag]))) for lag in lags]
+        h = np.polyfit(np.log(lags), np.log(tau), 1)[0]
+        h_vals.append(h)
+    fig = go.Figure(go.Histogram(x=h_vals, nbinsx=15, marker_color='magenta'))
+    fig.add_vline(x=0.5, line_dash="dash", line_color="white", annotation_text="Random Walk (0.5)")
+    fig.update_layout(title="Path Persistence Profile (Hurst Exponent Distribution)", xaxis_title="Hurst Exponent", template="plotly_dark", height=400)
+    return fig
+
+def create_vol_surface_skew_viz(params: OptionParams) -> go.Figure:
+    """Visualization of the Volatility Smile/Skew impact on Price."""
+    vols = np.linspace(0.1, 0.6, 20)
+    prices = [BlackScholes.price(OptionParams(S0=params.S0, K=params.K, T=params.T, r=params.r, sigma=v, q=params.q, option_type=params.option_type)) for v in vols]
+    fig = go.Figure(go.Scatter(x=vols, y=prices, mode='lines+markers', line=dict(color='cyan')))
+    fig.update_layout(title="Volatility-Price Elasticity Curve", xaxis_title="Volatility (σ)", yaxis_title="Option Price ($)", template="plotly_dark", height=400)
+    return fig
+
+def create_payoff_probability_heatmap(payoffs: List[float]) -> go.Figure:
+    """Heatmap showing probability density of specific payoff ranges."""
+    counts, bins = np.histogram(payoffs, bins=20)
+    probs = counts / len(payoffs)
+    fig = go.Figure(go.Heatmap(z=[probs], x=bins[:-1], y=['Density'], colorscale='Viridis'))
+    fig.update_layout(title="Payoff Density Concentration Heatmap", xaxis_title="Payoff ($)", template="plotly_dark", height=300)
+    return fig
+
 def create_elasticity_profile(params: OptionParams) -> go.Figure:
     """Option Leverage (Omega) evolution over spot prices."""
     spots = np.linspace(params.S0 * 0.5, params.S0 * 1.5, 50)
@@ -2822,7 +2870,7 @@ def render_main_content(
         with tab5:
             st.markdown("### 🧬 Advanced Intelligence Layer (50+ Strategic Layers)")
             
-            subtabs = st.tabs(["🌐 3D Surfaces", "📊 Advanced Analytics", "🛡️ Risk & Sensitivity", "🌊 Path Dynamics"])
+            subtabs = st.tabs(["🌐 3D Surfaces", "📊 Advanced Analytics", "🛡️ Risk & Sensitivity", "🌊 Path Dynamics", "💡 Mathematical Engine"])
             
             with subtabs[0]:
                 st.info("💡 Interactive 3D Surfaces Explorer (Optimized Performance)")
@@ -2884,9 +2932,20 @@ def render_main_content(
                 with col3d2:
                     st.plotly_chart(create_pop_surface_3d(params), use_container_width=True, key="3d_pop_grid")
                 
-                if result.paths:
-                    st.plotly_chart(create_path_extremes_3d(result.paths), use_container_width=True, key="3d_extremes_grid")
+                st.plotly_chart(create_path_extremes_3d(result.paths), use_container_width=True, key="3d_extremes_grid")
                 st.plotly_chart(create_vega_surface_spot_time_3d(params), use_container_width=True, key="3d_vega_st_grid")
+
+            with subtabs[4]:
+                st.markdown("### 🧬 Higher-Order Mathematical Intelligence")
+                mcol1, mcol2 = st.columns(2)
+                with mcol1:
+                    st.plotly_chart(create_chaos_phase_space(result.paths), use_container_width=True, key="chaos_math_tab5")
+                    st.plotly_chart(create_kelly_growth_viz(params, result.price), use_container_width=True, key="kelly_math_tab5")
+                with mcol2:
+                    st.plotly_chart(create_hurst_persistence_viz(result.paths), use_container_width=True, key="hurst_math_tab5")
+                    st.plotly_chart(create_vol_surface_skew_viz(params), use_container_width=True, key="vol_skew_math_tab5")
+                
+                st.plotly_chart(create_payoff_probability_heatmap(result.payoffs), use_container_width=True, key="payoff_heat_tab5")
 
             with subtabs[1]:
                 col_adv1, col_adv2 = st.columns(2)
