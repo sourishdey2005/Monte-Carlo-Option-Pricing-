@@ -41,17 +41,12 @@ from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
 
-# Load environment variables from .env file
-try:
-    from dotenv import load_dotenv
-    # Load .env file from current directory
-    env_path = Path(__file__).parent / '.env'
-    if env_path.exists():
-        load_dotenv(dotenv_path=env_path, override=True)
-    else:
-        load_dotenv(override=True)  # Try default locations
-except ImportError:
-    st.warning("python-dotenv not installed. Using system environment variables only.")
+# Load environment variables (optional fallback)
+import os
+from pathlib import Path
+
+# API Configuration - Hardcoded for immediate use
+ALPHA_VANTAGE_API_KEY = "LUOX9WBCP5ZYFZ0K"
 
 # Scientific computing
 import numpy as np
@@ -74,19 +69,12 @@ from urllib3.util.retry import Retry
 # ============================================================================
 
 def get_env_variable(var_name: str, default_value: str = "") -> str:
-    """
-    Safely retrieve environment variable with fallback.
-    
-    Priority order:
-    1. System environment variables
-    2. .env file variables (loaded by dotenv)
-    3. Default value
-    """
+    """Safely retrieve environment variable with fallback."""
     value = os.getenv(var_name, default_value)
     return value.strip() if value else default_value
 
-# API Configuration from Environment
-ALPHA_VANTAGE_API_KEY: str = get_env_variable("ALPHA_VANTAGE_API_KEY", "demo")
+# API Configuration from Hardcoded String (overridable by ENV)
+ALPHA_VANTAGE_API_KEY: str = get_env_variable("ALPHA_VANTAGE_API_KEY", ALPHA_VANTAGE_API_KEY)
 API_BASE_URL: str = "https://www.alphavantage.co/query"
 API_RATE_LIMIT_PER_MINUTE: int = 5  # Free tier limit
 API_DAILY_LIMIT: int = 25  # Free tier daily limit

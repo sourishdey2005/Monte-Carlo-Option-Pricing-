@@ -47,13 +47,7 @@ A high-performance, professional-grade quantitative finance tool for pricing Eur
    pip install -r requirements.txt
    ```
 
-3. **Configure API (Optional):**
-   Create a `.env` file and add your Alpha Vantage API key:
-   ```env
-   ALPHA_VANTAGE_API_KEY=your_key_here
-   ```
-
-4. **Launch the Dashboard:**
+3. **Launch the Dashboard:**
    ```bash
    streamlit run app.py
    ```
