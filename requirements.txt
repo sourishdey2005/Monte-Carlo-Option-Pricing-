@@ -1,0 +1,21 @@
+# Core Framework
+streamlit>=1.40.0
+
+# Scientific Computing
+numpy>=1.26.0
+scipy>=1.11.0
+pandas>=2.1.0
+
+# Visualization
+plotly>=5.18.0
+
+# API & HTTP
+requests>=2.31.0
+urllib3>=2.1.0
+
+# Environment Configuration
+python-dotenv>=1.0.0
+
+# Build tools
+setuptools>=68.0
+wheel>=0.41.0
