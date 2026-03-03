@@ -1421,6 +1421,27 @@ def create_bollinger_bands(paths: List[List[float]]) -> go.Figure:
 
 # --- NEW VISUALIZATIONS (20 ADDITIONAL) ---
 
+def create_standard_error_decay_plot(payoffs: List[float], bs_price: float) -> go.Figure:
+    """Visualization of Standard Error decay as a function of sample size (N)."""
+    n_total = len(payoffs)
+    sample_sizes = np.geomspace(100, n_total, 20, dtype=int)
+    errors = []
+    
+    for n in sample_sizes:
+        subset = payoffs[:n]
+        std_dev = np.std(subset)
+        std_err = std_dev / np.sqrt(n)
+        errors.append(std_err)
+        
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=sample_sizes, y=errors, mode='lines+markers', name='Observed Error', line=dict(color='orange')))
+    # Theoretical 1/sqrt(N) line
+    theoretical = errors[0] * np.sqrt(sample_sizes[0]) / np.sqrt(sample_sizes)
+    fig.add_trace(go.Scatter(x=sample_sizes, y=theoretical, mode='lines', name='Theoretical 1/√N', line=dict(dash='dash', color='gray')))
+    
+    fig.update_layout(title="Monte Carlo Efficiency: Standard Error Decay", xaxis_title="Number of Simulations (N)", yaxis_title="Standard Error", xaxis_type="log", yaxis_type="log", template="plotly_dark", height=400)
+    return fig
+
 def create_price_velocity_acceleration(paths: List[List[float]]) -> go.Figure:
     """Visualize 2nd derivative of price paths (Acceleration)."""
     mean_path = np.mean(paths, axis=0)
@@ -2717,14 +2738,19 @@ def render_main_content(
             pcol1, pcol2 = st.columns(2)
             with pcol1:
                 if result.paths and len(result.paths) > 0:
-                    st.plotly_chart(create_path_heatmap(result.paths), use_container_width=True)
+                    st.plotly_chart(create_path_heatmap(result.paths), use_container_width=True, key="path_heatmap_tab1")
+                    st.plotly_chart(create_synthetic_candles(result.paths), use_container_width=True, key="synthetic_candles_tab1")
                 else:
                     st.empty()
             with pcol2:
                 if result.paths and len(result.paths) > 0:
-                    st.plotly_chart(create_prob_cone(result.paths, market_data), use_container_width=True)
+                    st.plotly_chart(create_prob_cone(result.paths, market_data), use_container_width=True, key="prob_cone_tab1")
+                    st.plotly_chart(create_bollinger_bands(result.paths), use_container_width=True, key="bollinger_bands_tab1")
                 else:
                     st.empty()
+            
+            if result.paths and len(result.paths) > 0:
+                st.plotly_chart(create_animated_hist(result.paths), use_container_width=True, key="layered_hist_tab1")
         
         with tab2:
             st.markdown(CHART_CONTAINER_CLASS, unsafe_allow_html=True)
@@ -2747,9 +2773,13 @@ def render_main_content(
             
             col1, col2 = st.columns(2)
             with col1:
-                st.plotly_chart(create_violin_dist(result.payoffs), use_container_width=True)
+                st.plotly_chart(create_violin_dist(result.payoffs), use_container_width=True, key="violin_tab2")
+                st.plotly_chart(create_log_return_dist(result.paths), use_container_width=True, key="log_ret_tab2")
             with col2:
-                st.plotly_chart(create_cum_payoff(result.payoffs), use_container_width=True)
+                st.plotly_chart(create_cum_payoff(result.payoffs), use_container_width=True, key="cum_payoff_tab2")
+                st.plotly_chart(create_risk_neutral_density(params), use_container_width=True, key="rnd_tab2")
+            
+            st.plotly_chart(create_skew_kurtosis_evolution(result.paths), use_container_width=True, key="skew_kurtosis_tab2")
         
         with tab3:
             st.markdown(CHART_CONTAINER_CLASS, unsafe_allow_html=True)
@@ -2765,9 +2795,13 @@ def render_main_content(
             
             col1, col2 = st.columns(2)
             with col1:
-                st.plotly_chart(create_efficiency_frontier(result, n_sims), use_container_width=True)
+                st.plotly_chart(create_efficiency_frontier(result, n_sims), use_container_width=True, key="eff_frontier_tab3")
+                st.plotly_chart(create_discrete_convergence(result.payoffs, bs_price), use_container_width=True, key="discrete_conv_tab3")
             with col2:
-                st.plotly_chart(create_error_dist(result.payoffs, params), use_container_width=True)
+                st.plotly_chart(create_error_dist(result.payoffs, params), use_container_width=True, key="error_dist_tab3")
+                st.plotly_chart(create_standard_error_decay_plot(result.payoffs, bs_price), use_container_width=True, key="stderr_decay_tab3")
+            
+            st.plotly_chart(create_var_reduction_comp(params), use_container_width=True, key="var_reduction_tab3")
         
         with tab4:
             st.markdown(CHART_CONTAINER_CLASS, unsafe_allow_html=True)
@@ -2777,9 +2811,13 @@ def render_main_content(
             
             col1, col2 = st.columns(2)
             with col1:
-                st.plotly_chart(create_greeks_sensitivity_plot(params), use_container_width=True)
+                st.plotly_chart(create_greeks_sensitivity_plot(params), use_container_width=True, key="greek_sens_tab4")
+                st.plotly_chart(create_greek_corr_heatmap(params), use_container_width=True, key="greek_corr_tab4")
             with col2:
-                st.plotly_chart(create_sunburst_greeks(mc_greeks), use_container_width=True)
+                st.plotly_chart(create_sunburst_greeks(mc_greeks), use_container_width=True, key="sunburst_greek_tab4")
+                st.plotly_chart(create_radar_sensitivity(params), use_container_width=True, key="radar_greek_tab4")
+            
+            st.plotly_chart(create_interactive_greek_explorer(params), use_container_width=True, key="interactive_greek_tab4")
 
         with tab5:
             st.markdown("### 🧬 Advanced Intelligence Layer (50+ Strategic Layers)")
