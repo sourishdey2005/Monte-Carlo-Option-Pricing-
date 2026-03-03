@@ -2442,36 +2442,10 @@ def render_sidebar() -> Tuple[OptionParams, str, int, MarketData]:
     """
     st.sidebar.header("⚙️ Configuration")
     
-    # API Configuration Section
-    with st.sidebar.expander("🔑 API Configuration", expanded=False):
-        st.markdown("""
-        **Alpha Vantage API**
-        - Free tier: 25 calls/day, 5 calls/minute
-        - Get key: [alphavantage.co/support](https://www.alphavantage.co/support/#api-key)
-        """)
-        
-        # Show current API key status
-        current_key = ALPHA_VANTAGE_API_KEY
-        if current_key == "demo":
-            st.warning("Using DEMO key (limited data)")
-        else:
-            masked_key = current_key[:4] + "*" * (len(current_key) - 8) + current_key[-4:]
-            st.success(f"API Key: {masked_key}")
-        
-        # Allow override
-        api_key_override = st.text_input(
-            "Override API Key (optional)",
-            value="",
-            type="password",
-            placeholder="Enter your API key here",
-            help="Leave empty to use .env file key"
-        )
-        
-        if api_key_override:
-            os.environ["ALPHA_VANTAGE_API_KEY"] = api_key_override
-            st.success("API key updated for this session")
-            # Reinitialize client
-            AlphaVantageClient._instance = None
+    # API Configuration Section (Hardcoded)
+    with st.sidebar.expander("🔑 API Status", expanded=False):
+        st.success("✅ Alpha Vantage API: Hardcoded Active")
+        st.info("Using Integrated Quantitative Intelligence Hub")
     
     # Market Data Section
     st.sidebar.subheader("📊 Market Data")
@@ -3180,20 +3154,6 @@ def main():
     **Real-time Option Analytics** | Data: Alpha Vantage API | 
     Model: Geometric Brownian Motion | Engine: Parallel Monte Carlo
     """)
-    
-    # Check for .env file
-    env_file = Path(__file__).parent / '.env'
-    if not env_file.exists():
-        st.warning("""
-        ⚠️ **.env file not found!**
-        
-        Please create a `.env` file in the same directory with:
-        ```
-        ALPHA_VANTAGE_API_KEY=your_api_key_here
-        ```
-        
-        Get your free API key at: https://www.alphavantage.co/support/#api-key
-        """)
     
     # Render sidebar and get configuration
     params, ticker, n_sims, n_steps, market_data = render_sidebar()
