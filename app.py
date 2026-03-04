@@ -2442,39 +2442,7 @@ def render_sidebar() -> Tuple[OptionParams, str, int, MarketData]:
     Returns:
         Tuple of (OptionParams, ticker, n_simulations, market_data)
     """
-    st.sidebar.header("⚙️ Configuration")
-    
-    # API Configuration Section
-    with st.sidebar.expander("🔑 Pro API Activation", expanded=market_data.is_mock):
-        st.markdown("""
-        **Get your FREE API key** at [AlphaVantage.co](https://www.alphavantage.co/support/#api-key)
-        
-        *Steps to proceed:*
-        1. Click the link above.
-        2. Enter your email to get a key.
-        3. Paste it below for live data access.
-        """)
-        
-        api_key_override = st.text_input(
-            "Enter API Key",
-            value="",
-            type="password",
-            placeholder="Search API Key...",
-            help="Providing your own key enables real-time market data fetching."
-        )
-        
-        if api_key_override:
-            # Update the environment for the current process
-            os.environ["ALPHA_VANTAGE_API_KEY"] = api_key_override
-            # Reinitialize the singleton client to pick up the new key
-            AlphaVantageClient._instance = None
-            st.success("✅ Pro API Access Enabled")
-            if st.button("🔄 Reload with Live Data"):
-                st.rerun()
-    
-    # Market Data Section
-    st.sidebar.subheader("📊 Market Data")
-    
+    # --- Data Initialization (Moved up to fix UnboundLocalError) ---
     popular_tickers = [
         # Tech & Growth
         "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "NFLX", "ADBE", "CRM", 
@@ -2524,6 +2492,40 @@ def render_sidebar() -> Tuple[OptionParams, str, int, MarketData]:
         st.session_state.market_data = client.fetch_quote(ticker)
     
     market_data = st.session_state.market_data
+    # --- End Data Initialization ---
+
+    st.sidebar.header("⚙️ Configuration")
+    
+    # API Configuration Section
+    with st.sidebar.expander("🔑 Pro API Activation", expanded=market_data.is_mock):
+        st.markdown("""
+        **Get your FREE API key** at [AlphaVantage.co](https://www.alphavantage.co/support/#api-key)
+        
+        *Steps to proceed:*
+        1. Click the link above.
+        2. Enter your email to get a key.
+        3. Paste it below for live data access.
+        """)
+        
+        api_key_override = st.text_input(
+            "Enter API Key",
+            value="",
+            type="password",
+            placeholder="Search API Key...",
+            help="Providing your own key enables real-time market data fetching."
+        )
+        
+        if api_key_override:
+            # Update the environment for the current process
+            os.environ["ALPHA_VANTAGE_API_KEY"] = api_key_override
+            # Reinitialize the singleton client to pick up the new key
+            AlphaVantageClient._instance = None
+            st.success("✅ Pro API Access Enabled")
+            if st.button("🔄 Reload with Live Data"):
+                st.rerun()
+    
+    # Market Data Section
+    st.sidebar.subheader("📊 Market Data")
     
     # Display market data summary
     col1, col2 = st.sidebar.columns(2)
