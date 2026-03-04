@@ -1,3 +1,12 @@
+---
+title: Monte Carlo Option Pricing
+emoji: 📈
+colorFrom: pink
+colorTo: red
+sdk: docker
+app_port: 7860
+---
+
 # 🎯 Monte Carlo Option Pricing Dashboard
 
 A high-performance, professional-grade quantitative finance tool for pricing European options using parallel Monte Carlo simulations. This dashboard provides deep insights into option sensitivities (Greeks), path dynamics, and statistical distributions with over 70+ advanced visualizations.
