@@ -263,13 +263,11 @@ class AlphaVantageClient:
             
             # Check for Alpha Vantage specific notes/errors
             if "Note" in data:
-                # This is usually a rate limit warning
-                st.info(f"ℹ️ API Rate limit: Using fallback data for {symbol}")
+                # Silent fallback for rate limits
                 return self._generate_mock_data(symbol)
             
             if "Error Message" in data:
-                # Invalid API key or symbol
-                st.info(f"💡 Info: Symbol {symbol} not found or API restricted. Operating in Synthetic Mode.")
+                # Silent fallback for errors
                 return self._generate_mock_data(symbol)
                 
             # Parse successful response
@@ -278,7 +276,6 @@ class AlphaVantageClient:
                 
                 # Check if we got an empty quote
                 if not quote.get('01. symbol'):
-                    st.info(f"💡 Info: Standardizing {symbol} data...")
                     return self._generate_mock_data(symbol)
                 
                 market_data = MarketData(
@@ -2638,6 +2635,25 @@ def render_main_content(
     Render main dashboard content with analysis results.
     """
     
+    # API ONBOARDING HERO (Only if mock data is used)
+    if market_data.is_mock:
+        with st.container():
+            st.markdown(f"""
+            <div style="background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); padding: 25px; border-radius: 15px; border-left: 5px solid #FFD700; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <h2 style="margin: 0; color: #FFD700; font-family: 'Segoe UI', sans-serif;">🚀 Unlock Live Market Intelligence</h2>
+                <p style="color: white; font-size: 1.1em; margin-top: 10px;">
+                    Currently viewing <b>Synthetic Simulation Data</b> for {ticker}. To access institutional-grade live exchange pricing:
+                </p>
+                <div style="display: flex; gap: 20px; align-items: center; margin-top: 15px;">
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px;">
+                        1. Get your <b>FREE API Key</b> at <a href="https://www.alphavantage.co/support/#api-key" style="color: #4ECDC4; font-weight: bold;">AlphaVantage.co</a>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px;">
+                        2. Paste it in the <b>🔑 Pro API Activation</b> field in the sidebar.
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
     # LIVE ANALYTICAL PREVIEW (Real-time updates without clicking Run)
     st.subheader("💡 Live Analytical Preview (Real-time)")
     live_bs_price = BlackScholes.price(params)
